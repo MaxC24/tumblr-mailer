@@ -3,32 +3,30 @@ var ejs = require("ejs");
 var tumblr = require("tumblr.js")
 var mandrill = require('mandrill-api/mandrill');
 var mandrill_client = new mandrill.Mandrill('HQlvcLaH5DIqs1m0H4tx2w');
+var clientApi = require("./clientApi.js");
 
 var csvFile = fs.readFileSync("friend_list.csv", "utf8");
 var emailTemplate = fs.readFileSync("email_template.ejs", "utf8");
 var arrayOfContacts = csvParse(csvFile);
-var client = tumblr.createClient({
-  consumer_key: 'NldVzswVkrKCYXIrFz9pKiM7ukllM2E9fazmWolEiZGOiU3NBl',
-  consumer_secret: 'JWwMiaaMyenTdvQyTWTUF3TRmdsrROWhHbyoH9BRN5HIaA3FTI',
-  token: 'lDo970LpY6UNdUYZDyYVRLHKKb4eJWkvmiJEfPkV93DTPY2qin',
-  token_secret: 'YMCdAFdaXiENx8PI1RZrS1U6gV7gwHbdA0R8i3QZO99Cduwvq9'
-});
+var client = tumblr.createClient(clientApi.api());
 
 
 //Create a function to parse the file into Objects then push them into an array.
 function csvParse(csvFile) {
-	var arrayLines = csvFile.split("\n").slice(1, -1);
+	var arrayLines = csvFile.split("\n").slice(1);
 	var resArray = [];
 
 	for(var i = 0; i < arrayLines.length; i++){
-		var arrayWords = arrayLines[i].split(",");
-		var contactObj = {
-			firstName: arrayWords[0],
-			lastName : arrayWords[1],
-			numMonthsSinceContact: arrayWords[2],
-			emailAddress: arrayWords[3]
+		if(arrayLines[i] != []){
+			var arrayWords = arrayLines[i].split(",");
+			var contactObj = {
+				firstName: arrayWords[0],
+				lastName : arrayWords[1],
+				numMonthsSinceContact: arrayWords[2],
+				emailAddress: arrayWords[3]
+			}
+			resArray.push(contactObj);
 		}
-		resArray.push(contactObj);
 	}
 	return resArray;
 }
@@ -92,10 +90,8 @@ function sendEmail(to_name, to_email, from_name, from_email, subject, message_ht
     });
  }
 
-
-
+console.log(arrayOfContacts);
 client.posts('massimoatfullstack.tumblr.com', createEmails);
-
 
 
 
